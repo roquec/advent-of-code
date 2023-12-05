@@ -1,5 +1,5 @@
 import regex as re
-from shared import util
+from shared import util, matrix
 
 """
     2023 Day 3: Gear Ratios
@@ -28,24 +28,11 @@ test_result = 4361
 def check_number(lines, number, row_index, col_index):
     surrounding_chars = []
     digits = len(number)
-    if row_index-1 >= 0:
-        if col_index-1 >= 0:
-            surrounding_chars.append(lines[row_index-1][col_index-1])
-        surrounding_chars.append(lines[row_index-1][col_index:col_index+digits])
-        if col_index+digits+1 < len(lines[row_index-1]):
-            surrounding_chars.append(lines[row_index-1][col_index+digits])
 
-    if col_index - 1 >= 0:
-        surrounding_chars.append(lines[row_index][col_index - 1])
-    if col_index + digits + 1 < len(lines[row_index]):
-        surrounding_chars.append(lines[row_index][col_index + digits])
-
-    if row_index+1 < len(lines):
-        if col_index-1 >= 0:
-            surrounding_chars.append(lines[row_index+1][col_index-1])
-        surrounding_chars.append(lines[row_index+1][col_index:col_index+digits])
-        if col_index+digits+1 < len(lines[row_index+1]):
-            surrounding_chars.append(lines[row_index+1][col_index+digits])
+    surrounding_chars += matrix.matrix_range(lines, row_index-1, col_index-1, col_index + digits + 1, '.')
+    surrounding_chars += matrix.matrix_get(lines, row_index, col_index-1, '.')
+    surrounding_chars += matrix.matrix_get(lines, row_index, col_index+digits, '.')
+    surrounding_chars += matrix.matrix_range(lines, row_index+1, col_index-1, col_index + digits + 1, '.')
 
     if re.search(r'[^A-Za-z0-9.\s]', ''.join(surrounding_chars)):
         return True
