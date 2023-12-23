@@ -48,9 +48,35 @@ test_result = 35
 # Set up
 
 # Solution
-def solution(case):
-    total = 0
-    return total
+def process_seed(seed, steps):
+    source = seed
+    destination = -1
+
+    for step in steps:
+        destination = -1
+        for range in step:
+            if range[1] <= source < (range[1] + range[2]):
+                destination = range[0] + (source - range[1])
+        if destination == -1:
+            destination = source
+        source = destination
+
+    return destination
+
+
+def solution(data):
+    location = -1
+
+    seeds = [int(item) for item in data.split('\n')[0][7:].split(' ')]
+    steps = [[[int(x) for x in item.split(' ')] for item in step.split('\n')] for step in re.split(r'\n\n.+:\n', data)[1:]]
+
+    for seed in seeds:
+        if location == -1:
+            location = process_seed(seed, steps)
+        else:
+            location = min(location, process_seed(seed, steps))
+
+    return location
 
 
 # Check Solution
