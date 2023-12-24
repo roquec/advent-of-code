@@ -4,40 +4,83 @@ import regex as re
 from shared import util, matrix
 
 """
-    2023 Day 6: Wait For It
-    https://adventofcode.com/2023/day/6
+    2023 Day 7: Camel Cards
+    https://adventofcode.com/2023/day/7
 """
 
 # Example Data
-test_data = """Time:      7  15   30
-Distance:  9  40  200"""
+test_data = """32T3K 765
+T55J5 684
+KK677 28
+KTJJT 220
+QQQJA 483"""
 
 # Example Result
-test_result = 71503
+test_result = 5905
 
 
 # Solution
-def solve_race(time, record):
-    lower_bound = (time - math.sqrt(time*time - (4 * record))) / 2
-    upper_bound = (time + math.sqrt(time*time - (4 * record))) / 2
+def identify_poker_hand(hand):
+    card_counts = {}
+    jokers_count = 0
+    for card in hand:
+        if card == "J":
+            jokers_count += 1
+        elif card in card_counts:
+            card_counts[card] += 1
+        else:
+            card_counts[card] = 1
 
-    lower_bound = math.floor(lower_bound) + 1
-    upper_bound = math.ceil(upper_bound) - 1
+    counts = sorted(card_counts.values(), reverse=True)
 
-    print(f'Race with time {time} and record {record} => lower_bound: {lower_bound}, upper_bound: {upper_bound}')
-    return upper_bound - lower_bound + 1
+    if len(counts) == 0:
+        counts.append(jokers_count)
+    else:
+        counts[0] = counts[0] + jokers_count
+
+    if 5 in counts:
+        return "L"
+    elif 4 in counts:
+        return "K"
+    elif counts == [3, 2]:
+        return "J"
+    elif 3 in counts:
+        return "I"
+    elif counts == [2, 2, 1]:
+        return "H"
+    elif 2 in counts:
+        return "G"
+    else:
+        return "F"
+
+
+def process_hand(hand):
+    hand_type = identify_poker_hand(hand)
+
+    processed_hand = hand_type + hand.replace("A", "E").replace("K", "D").replace("Q", "C").replace("J", "1").replace("T", "A")
+
+    return processed_hand
 
 
 def solution(data):
     lines = data.split('\n')
 
-    time_data = lines[0]
-    distance_data = lines[1]
+    hands = []
 
-    time = ''.join(re.findall(r'\d+', time_data))
-    distance = ''.join(re.findall(r'\d+', distance_data))
+    for index, line in enumerate(lines):
+        hand = line.split(' ')[0]
+        bid = line.split(' ')[1]
+        processed_hand = process_hand(hand)
+        hands.append({"hand": hand, "bid": bid, "processed_hand": processed_hand})
 
-    return solve_race(int(time), int(distance))
+    sorted_hands = sorted(hands, key=lambda x: x['processed_hand'])
+
+    total = 0
+
+    for index, hand in enumerate(sorted_hands):
+        total += int(hand['bid']) * (index + 1)
+
+    return total
 
 
 # Check Solution
